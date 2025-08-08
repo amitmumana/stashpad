@@ -15,6 +15,8 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
+  setPersistence,
+  browserLocalPersistence,
 } from "firebase/auth";
 import { Loader } from "@/components/dashboard/loader";
 
@@ -33,12 +35,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
+    const initializeAuth = async () => {
+      await setPersistence(auth, browserLocalPersistence);
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        setUser(user);
+        setLoading(false);
+      });
+      return unsubscribe;
+    };
 
-    return () => unsubscribe();
+    const unsubscribePromise = initializeAuth();
+
+    return () => {
+      unsubscribePromise.then((unsubscribe) => unsubscribe && unsubscribe());
+    };
   }, []);
 
   const signIn = (email: string, password: string) => {
@@ -55,7 +65,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await updateProfile(userCredential.user, { displayName: fullName });
     }
     // Manually update the user state because onAuthStateChanged might be slow
-    setUser(auth.currentUser);
+    const updatedUser = { ...userCredential.user, displayName: fullName };
+    setUser(updatedUser as User);
     return userCredential;
   };
 
