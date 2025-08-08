@@ -1,0 +1,21 @@
+{
+  "name": "Stashpad",
+  "short_name": "Stashpad",
+  "description": "Your personal space to save bookmarks, notes, and code snippets.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#18181b",
+  "theme_color": "#a8a29e",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
