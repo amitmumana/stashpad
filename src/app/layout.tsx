@@ -7,7 +7,6 @@ export const metadata: Metadata = {
   title: "Stashpad",
   description:
     "Your personal space to save bookmarks, notes, and code snippets.",
-  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({
@@ -20,6 +19,9 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
+        {/* FOR PWA  */}
+        <link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png" />
+        <link rel="manifest" href="/manifest.json" />
         <link
           rel="preconnect"
           href="https://fonts.gstatic.com"
