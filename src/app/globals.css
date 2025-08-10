@@ -60,3 +60,22 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+::-webkit-scrollbar {
+  width: 2px;
+  height: 2px;
+}
+
+::-webkit-scrollbar-track {
+  background: 240 5% 12%;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cdcccc;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #c0bfbf;
+}

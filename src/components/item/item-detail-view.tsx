@@ -23,6 +23,8 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface ItemDetailViewProps {
   item: Item;
@@ -58,10 +60,11 @@ export function ItemDetailView({ item }: ItemDetailViewProps) {
     navigator.clipboard
       .writeText(content)
       .then(() => {
-        toast({
-          title: "Copied!",
-          description: "Code snippet copied to clipboard.",
-        });
+        const description =
+          type === "code"
+            ? "Code snippet copied to clipboard."
+            : "Note content copied to clipboard.";
+        toast({ title: "Copied!", description });
         setIsCopied(true);
         setTimeout(() => setIsCopied(false), 2000);
       })
@@ -69,7 +72,7 @@ export function ItemDetailView({ item }: ItemDetailViewProps) {
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Failed to copy code.",
+          description: "Failed to copy content.",
         });
       });
   };
@@ -93,7 +96,7 @@ export function ItemDetailView({ item }: ItemDetailViewProps) {
           <div className="flex-1">
             <CardTitle
               className="text-2xl font-bold leading-tight"
-              style={{ color }}
+              style={{ color: color }}
             >
               {title}
             </CardTitle>
@@ -124,58 +127,49 @@ export function ItemDetailView({ item }: ItemDetailViewProps) {
               </p>
             )}
           </div>
+          {(type === "code" || type === "note") && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 z-10"
+                    onClick={handleCopy}
+                  >
+                    {isCopied ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    {isCopied
+                      ? "Copied!"
+                      : type === "code"
+                      ? "Copy code"
+                      : "Copy note"}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </CardHeader>
         <CardContent className="p-6 pt-0">
-          {type === "bookmark" && url && (
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group block mb-4"
-            >
-              <div className="aspect-video w-full overflow-hidden rounded-md border bg-muted">
-                <Image
-                  src={`https://placehold.co/800x450.png`}
-                  alt={title}
-                  width={800}
-                  height={450}
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  data-ai-hint="website screenshot"
-                />
-              </div>
-            </a>
-          )}
           {content && (
             <>
               {type === "note" && (
-                <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap text-foreground/80">
-                  {content}
+                <div className="prose dark:prose-invert max-w-none text-foreground/80">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {content}
+                  </ReactMarkdown>
                 </div>
               )}
               {type === "code" && (
-                <div className="relative text-sm bg-muted/50 rounded-md p-4">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="absolute top-2 right-2 h-8 w-8"
-                          onClick={handleCopy}
-                        >
-                          {isCopied ? (
-                            <Check className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <Copy className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{isCopied ? "Copied!" : "Copy code"}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <pre className="overflow-auto">
+                <div className="relative text-sm bg-muted/50 rounded-md overflow-auto">
+                  <pre className="p-4">
                     <code className="font-code">{content}</code>
                   </pre>
                 </div>
