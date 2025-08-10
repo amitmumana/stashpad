@@ -18,6 +18,16 @@ import {
 } from "firebase/firestore";
 import type { Item } from "@/lib/types";
 
+const transformTimestamp = (timestamp: any): string => {
+  if (timestamp && typeof timestamp.toDate === "function") {
+    return timestamp.toDate().toISOString();
+  }
+  if (typeof timestamp === "string") {
+    return timestamp;
+  }
+  return new Date().toISOString();
+};
+
 export const fetchItems = async (
   userId: string,
   pageParam: QueryDocumentSnapshot<DocumentData> | null = null,
@@ -48,16 +58,14 @@ export const fetchItems = async (
     }
 
     const querySnapshot = await getDocs(q);
-    const items = querySnapshot.docs.map(
-      (doc) =>
-        ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt:
-            doc.data().createdAt?.toDate().toISOString() ??
-            new Date().toISOString(),
-        } as Item)
-    );
+    const items = querySnapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: transformTimestamp(data.createdAt),
+      } as Item;
+    });
 
     const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
 
@@ -81,8 +89,7 @@ export const fetchItemById = async (id: string): Promise<Item | null> => {
       return {
         id: docSnap.id,
         ...data,
-        createdAt:
-          data.createdAt?.toDate().toISOString() ?? new Date().toISOString(),
+        createdAt: transformTimestamp(data.createdAt),
       } as Item;
     } else {
       console.log("No such document!");
@@ -121,7 +128,15 @@ export const updateItem = async (
   updates: Partial<Omit<Item, "id">>
 ) => {
   try {
-    await updateDoc(doc(db, "items", id), updates);
+    // Firestore does not allow `undefined` values. We need to clean the updates object.
+    const cleanedUpdates: { [key: string]: any } = {};
+    for (const key in updates) {
+      if (updates[key as keyof typeof updates] !== undefined) {
+        cleanedUpdates[key] = updates[key as keyof typeof updates];
+      }
+    }
+
+    await updateDoc(doc(db, "items", id), cleanedUpdates);
   } catch (error) {
     console.error("Error updating item: ", error);
     throw error;
