@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { DashboardClient } from "@/components/dashboard/dashboard-client";
 import { Loader } from "@/components/dashboard/loader";
+import PwaHelper from "@/lib/pwa-helper";
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -24,5 +25,10 @@ export default function Home() {
     );
   }
 
-  return <DashboardClient />;
+  return (
+    <>
+      <PwaHelper />
+      <DashboardClient />
+    </>
+  );
 }
